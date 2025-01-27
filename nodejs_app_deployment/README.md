@@ -10,7 +10,7 @@
       - [2. Git Clone from GitHub repository](#2-git-clone-from-github-repository)
     - [Run the application](#run-the-application)
     - [Accessing the Application](#accessing-the-application)
-  - [Create Azure image of VM for generalisation](#create-azure-image-of-vm-for-generalisation)
+  - [Using generalised Azure image of VM](#using-generalised-azure-image-of-vm)
     - [1. Document your Commands for Dependencies](#1-document-your-commands-for-dependencies)
     - [2. Move App Code to the Root Directory](#2-move-app-code-to-the-root-directory)
     - [3. Run the waagent command](#3-run-the-waagent-command)
@@ -68,7 +68,7 @@
 
 ![nodejs test app](../images/nodejs_test_app.png)
 
-## Create Azure image of VM for generalisation
+## Using generalised Azure image of VM
 
 - The steps below prepare the node.js test app for generalisation.
 - The result is an azure image that can be used to deploy a number of VMs with the required source code and dependencies to run the application, skipping the previous manual steps.
