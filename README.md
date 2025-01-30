@@ -7,3 +7,4 @@
 - [Deploy Node.js app](/nodejs_app_deployment/README.md)
 - [Deploy Mongodb database](/mongo_db_deployment/README.md)
 - [Connect App to Database](/connect_app_db/README.md)
+- [Automate Initial App Server Setup](/app_vm_initial_setup/run_app_only.sh)
