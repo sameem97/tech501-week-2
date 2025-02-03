@@ -119,7 +119,7 @@ sudo waagent -deprovision+user -force
 ## Add Nginx Reverse Proxy
 
 - By adding Nginx reverse proxy, can access the app via our default port 80 rather than port 3000.
-- Edit nginx config file in: `/etc/nginx/sites-available/default` and add the line: `proxy_pass http://127.0.0.0:3000;` to the location field.
+- Edit nginx config file in: `/etc/nginx/sites-available/default` and add the line: `proxy_pass http://127.0.0.1:3000;` to the location field.
 - Check you can access the app without specifying port 3000, i.e. it will use default port 80 and should work just the same!
 
 ## Run app in background with pm2
