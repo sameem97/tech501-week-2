@@ -51,3 +51,5 @@ ab -n 10000 -c 200 http://<public_ip_address>/
 - Also observe the effects of our requests in the dashboard, although due to the simplicity of our application, the spikes may be minimal.
 
 ## Alarms
+
+- Can configure alarms to alert admin based on pre-defined conditions e.g. if CPU usage > 80%, send a text message notification.

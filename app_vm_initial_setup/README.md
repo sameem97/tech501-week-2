@@ -2,6 +2,8 @@
 
 ## Levels of Automation
 
+![Levels of Automation](<../images/levels of automation.jpg>)
+
 ### Manual
 
 - **Description**: Involves manually installing dependencies and configuring the environment by connecting to the VM via SSH.

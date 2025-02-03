@@ -22,11 +22,11 @@
 
 ## Benefits of Autoscaling
 
-- Worse to better: **No monitoring** -> **dashboard** -> **trigger alert** -> **Autoscaling**.
+- Worse to better:
 
-INSERT DIAGRAM OF THE ABOVE.
+    **No monitoring** -> **Dashboards** -> **Alerts** -> **Autoscaling**.
 
-- Ultimately autoscaling is to prevent downtime of our application and improve user experience as traffic is load balanced between our app instances.
+- Autoscaling is used to prevent downtime of our application and improve user experience as traffic is load balanced between our app instances.
 
 ## Autoscaling in Azure
 
@@ -121,6 +121,8 @@ pm2 start app.js
 - Tags
   - Owner: Sameem
 
+![VMSS/LB Architecture](<../images/vmss_lb architecture.jpg>)
+
 ### Reimaging
 
 - The **Reimage** option in the Virtual Machine Scale Sets (VMSS) instances tab allows you to reset one or more virtual machine instances to their original state using the base image specified in the scale set configuration.
@@ -133,6 +135,8 @@ pm2 start app.js
 - **Usage**: Typically used for maintenance, troubleshooting, or to revert changes that may have caused instability.
 
 - Reimaging is a useful feature for maintaining the health and consistency of your VM instances within a scale set.
+
+- In our case, because we have used **User Data** which is not persistent between VM restarts, need to **Reimage** after any VM restarts for the app to run as expected.
 
 ### Health Check
 

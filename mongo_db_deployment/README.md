@@ -232,7 +232,8 @@ sudo systemctl status mongod
         pm2 start app.js
         ```
 
-4. Confirm app and db posts load up.
+4. Confirm app and db posts load up. Start ping.
+    - SSH into the app vm and start ping in the background to the db.
 
 5. Create the NVA vm
     - Name: tech501-sameem-in-3-subnet-sparta-app-nva
@@ -254,8 +255,9 @@ sudo systemctl status mongod
       - name: public-subnet
       - subnet address range: 10.0.2.0/24
 
-    The configuration above forces traffic to route through the NVA, rather than direct to the db vm. See app terminal to verify pings are not being received by db once traffic is re-routed.
-
+    - The configuration above forces any traffic leaving the public subnet and destined for the private subnet e.g. to the db VM, to route through the NVA.
+    - See app terminal to verify pings have stopped being sent. This is because the traffic is now redirected to the NVA so is not being received by the db.
+  
 7. Enable IP forwarding on NVA
   
     - Currently NVA is not doing anything with the traffic it is receiving.
@@ -275,7 +277,7 @@ sudo systemctl status mongod
     - `sudo sysctl -p`, reload config file, should show forwarding status as 1 now.
 
     - Re-check app vm terminal, ping to the db vm should have resumed.
-    - So now traffic from app vm is routing through the nva to reach the db.
+    - So now NVA is allowing the app vm traffic through to the db.
   
 8. Set IP tables rules (firewalls rules)
 
@@ -370,7 +372,7 @@ sudo systemctl status mongod
   
 9. Add further db vm nsg rules
 
-   - We can add two further nsg rules for the db vm:
+   - We can add two further nsg rules for the db vm.
      - Allow mongodb traffic
      - Deny all other traffic
 
