@@ -27,7 +27,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Connect to the mongodb server
-export DB_HOST=mongodb://10.0.3.4:27017/posts
+export DB_HOST=mongodb://<db_private_ip>:27017/posts
 
 # Change directory to the app
 cd tech501-sparta-app/app
