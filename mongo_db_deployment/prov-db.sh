@@ -49,3 +49,11 @@ sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
 echo "restarting MongoDB service..."
 sleep 5
 sudo systemctl restart mongod
+
+# Check if all commands were successful
+if [ $? -eq 0 ]; then
+  echo "Deployment successful!"
+else
+  echo "Deployment failed!"
+  exit 1
+fi
