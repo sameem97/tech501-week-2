@@ -18,6 +18,9 @@ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gp
 # Reload apt package database.
 sudo apt update
 
+# Preconfigure debconf to avoid interactive prompts
+echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+
 # install mongo db components
 sudo apt-get install -y mongodb-org=7.0.6 mongodb-org-database=7.0.6 mongodb-org-server=7.0.6 mongodb-mongosh mongodb-org-mongos=7.0.6 mongodb-org-tools=7.0.6
 
@@ -29,4 +32,5 @@ sudo systemctl start mongod
 sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
 
 # restart the mongo db service
+sleep 5
 sudo systemctl restart mongod
