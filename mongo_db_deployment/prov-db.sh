@@ -18,15 +18,23 @@ sudo apt update && sudo apt upgrade -y
 echo "installing gnupg and curl..."
 sudo apt install gnupg curl -y
 
-# Import the MongoDB public GPG key
-echo "importing the MongoDB public GPG key..."
-curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
-   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
-   --dearmor
+# Import the MongoDB public GPG key if not already imported
+if ! sudo gpg --list-keys | grep -q "MongoDB 7.0 Release Signing Key"; then
+  echo "importing the MongoDB public GPG key..."
+  curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+     sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+     --dearmor
+else
+  echo "MongoDB public GPG key already imported."
+fi
 
-# Create the list file /etc/apt/sources.list.d/mongodb-org-7.0.list for your version of Ubuntu
-echo "creating the list file for MongoDB..."
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+# Create the list file /etc/apt/sources.list.d/mongodb-org-7.0.list if not already created
+if [ ! -f /etc/apt/sources.list.d/mongodb-org-7.0.list ]; then
+  echo "creating the list file for MongoDB..."
+  echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+else
+  echo "MongoDB list file already exists."
+fi
 
 # Reload apt package database.
 echo "reloading apt package database..."
@@ -41,9 +49,13 @@ echo "enabling and starting MongoDB service..."
 sudo systemctl enable mongod
 sudo systemctl start mongod
 
-# change the bindIp in the mongod.conf file
-echo "changing the bindIp in the mongod.conf file..."
-sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
+# Change the bindIp in the mongod.conf file if not already changed
+if ! grep -q "bindIp: 0.0.0.0" /etc/mongod.conf; then
+  echo "changing the bindIp in the mongod.conf file..."
+  sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
+else
+  echo "bindIp already set to 0.0.0.0 in mongod.conf."
+fi
 
 # restart the mongo db service
 echo "restarting MongoDB service..."

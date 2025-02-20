@@ -18,10 +18,14 @@ sudo apt update && sudo apt upgrade -y
 echo "installing nginx..."
 sudo apt install nginx -y
 
-# Enable and start nginx
-echo "enabling and starting nginx..."
-sudo systemctl enable nginx
-sudo systemctl start nginx
+# Enable and start nginx if not already running
+if ! systemctl is-active --quiet nginx; then
+  echo "enabling and starting nginx..."
+  sudo systemctl enable nginx
+  sudo systemctl start nginx
+else
+  echo "nginx already running."
+fi
 
 # Install npm and nodejs
 echo "installing npm and nodejs..."
@@ -43,9 +47,13 @@ else
   cd ..
 fi
 
-# Add nginx reverse proxy
-echo "configuring nginx reverse proxy..."
-sudo sed -i 's|try_files.*|proxy_pass http://127.0.0.1:3000;|' /etc/nginx/sites-available/default
+# Add nginx reverse proxy if not already configured
+if ! grep -q "proxy_pass http://127.0.0.1:3000;" /etc/nginx/sites-available/default; then
+  echo "configuring nginx reverse proxy..."
+  sudo sed -i 's|try_files.*|proxy_pass http://127.0.0.1:3000;|' /etc/nginx/sites-available/default
+else
+  echo "nginx reverse proxy already configured."
+fi
 
 # Restart nginx
 echo "reloading nginx..."
@@ -63,9 +71,13 @@ cd tech501-sparta-app/app
 echo "installing npm packages..."
 npm install
 
-# Start the node app in backround with pm2
-echo "starting the node app with pm2..."
-pm2 start app.js
+# Start the node app in background with pm2 if not already running
+if ! pm2 list | grep -q app.js; then
+  echo "starting the node app with pm2..."
+  pm2 start app.js
+else
+  echo "node app already running with pm2."
+fi
 
 # Check if all commands were successful
 if [ $? -eq 0 ]; then
