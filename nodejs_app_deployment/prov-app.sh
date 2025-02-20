@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script will deploy a Node.js app on an Ubuntu 22.04 server
+# This script deploys a Node.js app on Ubuntu 22.04
 
 # Exit script if error occurs
 set -e
@@ -7,82 +7,83 @@ set -e
 # Set debconf to non-interactive mode to bypass prompts
 export DEBIAN_FRONTEND=noninteractive
 
-# Redirect all output and errors to a log file
-exec > /var/log/prov-app.log 2>&1
+# Log all output (both stdout & stderr) to a log file and display in terminal
+exec > >(tee -a /var/log/prov-app.log) 2>&1
 
-# Update package list and install
-echo "updating package list and upgrading packages..."
+echo "🔄 Updating package list and upgrading packages..."
 sudo apt update && sudo apt upgrade -y
 
-# Install nginx
-echo "installing nginx..."
-sudo apt install nginx -y
+echo "🌐 Installing Nginx..."
+sudo apt install -y nginx
 
-# Enable and start nginx if not already running
+# Enable & Start Nginx if not already running
 if ! systemctl is-active --quiet nginx; then
-  echo "enabling and starting nginx..."
+  echo "✅ Enabling & starting Nginx..."
   sudo systemctl enable nginx
   sudo systemctl start nginx
 else
-  echo "nginx already running."
+  echo "✅ Nginx is already running."
 fi
 
-# Install npm and nodejs
-echo "installing npm and nodejs..."
+echo "📦 Installing Node.js & npm..."
 sudo bash -c "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -"
-sudo apt-get install -y nodejs
+sudo apt-get install -y nodejs git
 
-# Install pm2
-echo "installing pm2..."
-sudo npm install -g pm2
-
-# Clone the nodejs app repo
-if [ ! -d "tech501-sparta-app" ]; then
-  echo "cloning the nodejs app repo..."
-  git clone https://github.com/sameem97/tech501-sparta-app.git
+echo "⚙️ Installing PM2..."
+if ! command -v pm2 &> /dev/null; then
+  sudo npm install -g pm2
 else
-  echo "repository already exists, pulling latest changes..."
-  cd tech501-sparta-app
+  echo "✅ PM2 is already installed."
+fi
+
+echo "📂 Checking for Node.js app repo..."
+APP_DIR="/home/ubuntu/tech501-sparta-app"
+
+if [ -d "$APP_DIR" ]; then
+  echo "🔄 Repo exists, pulling latest changes..."
+  cd "$APP_DIR"
+  git reset --hard
   git pull
-  cd ..
-fi
-
-# Add nginx reverse proxy if not already configured
-if ! grep -q "proxy_pass http://127.0.0.1:3000;" /etc/nginx/sites-available/default; then
-  echo "configuring nginx reverse proxy..."
-  sudo sed -i 's|try_files.*|proxy_pass http://127.0.0.1:3000;|' /etc/nginx/sites-available/default
 else
-  echo "nginx reverse proxy already configured."
+  echo "📥 Cloning the Node.js app repo..."
+  git clone https://github.com/sameem97/tech501-sparta-app.git "$APP_DIR"
 fi
 
-# Restart nginx
-echo "reloading nginx..."
-sudo systemctl reload nginx
+echo "🛠️ Configuring Nginx Reverse Proxy..."
+NGINX_CONF="/etc/nginx/sites-available/default"
+if ! grep -q "proxy_pass http://127.0.0.1:3000;" "$NGINX_CONF"; then
+  sudo sed -i 's|try_files.*|proxy_pass http://127.0.0.1:3000;|' "$NGINX_CONF"
+else
+  echo "✅ Nginx reverse proxy already configured."
+fi
 
-# Define mongodb connection string
-echo "define connection string to mongodb server..."
-export DB_HOST=mongodb://<db_private_ip>:27017/posts
+echo "🔄 Restarting Nginx to apply changes..."
+sudo systemctl restart nginx
 
-# Change directory to the app
-echo "changing directory to the app..."
-cd tech501-sparta-app/app
+echo "🗄️ Setting up MongoDB connection..."
+DB_HOST="mongodb://<db_private_ip>:27017/posts"
+export DB_HOST
 
-# Install npm packages, connect to db, clear and reseed (populate) the database
-echo "installing npm packages..."
+echo "📂 Changing directory to app..."
+cd "$APP_DIR/app"
+
+echo "📦 Installing npm dependencies..."
 npm install
 
-# Start the node app in background with pm2 if not already running
-if ! pm2 list | grep -q app.js; then
-  echo "starting the node app with pm2..."
-  pm2 start app.js
+# Set HOME variable for PM2
+export HOME=/home/ubuntu
+
+echo "🚀 Starting Node.js app with PM2..."
+if pm2 describe app > /dev/null 2>&1; then
+  echo "🔄 Restarting existing app..."
+  pm2 restart app --update-env
 else
-  echo "node app already running with pm2."
+  echo "✅ Starting new instance of the app..."
+  pm2 start app.js --name app --env production --update-env
 fi
 
-# Check if all commands were successful
-if [ $? -eq 0 ]; then
-  echo "Deployment successful!"
-else
-  echo "Deployment failed!"
-  exit 1
-fi
+# Ensure PM2 auto-starts on reboot
+sudo pm2 startup systemd -u ubuntu --hp /home/ubuntu
+pm2 save
+
+echo "🎉 Deployment successful!"
