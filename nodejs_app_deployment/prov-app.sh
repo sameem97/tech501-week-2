@@ -61,8 +61,7 @@ echo "🔄 Restarting Nginx to apply changes..."
 sudo systemctl restart nginx
 
 echo "🗄️ Setting up MongoDB connection..."
-DB_HOST="mongodb://<db_private_ip>:27017/posts"
-export DB_HOST
+export DB_HOST="mongodb://<db_private_ip>:27017/posts"
 
 echo "📂 Changing directory to app..."
 cd "$APP_DIR/app"
